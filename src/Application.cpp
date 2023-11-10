@@ -71,7 +71,17 @@ static int CreateShader(
     unsigned int vShader = compileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fShader = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
+    /*
+    * Attach or add shaders to the program object container
+    */
+    glAttachShader(programID, vShader);
+    glAttachShader(programID, fShader);
 
+    /*
+    * Link and validate all the shaders to program object container
+    */
+    glLinkProgram(programID);
+    glValidateProgram(programID);
 }
 
 

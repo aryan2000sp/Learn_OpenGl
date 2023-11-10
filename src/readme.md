@@ -10,5 +10,5 @@ Steps to compile and run shaders(has to be done for each shader used):
 3. Then once you have added the source compile the shader by calling glCompileShader()
 4. Then create the program object by calling glCreateProgram(). The program object is just container which contains multiple types of shader.
 5. Now add the shaders created to the program object container by calling glAttachShader()
-6. Once the shaders are added or attched to program object container then link all the shaders togather by calling glLinkProgram()
+6. Once the shaders are added or attched to program object container then link and validate all the shaders togather by calling glLinkProgram() and glValidateProgram()
 7. Once all the shaders are linked then we can use the program object container by calling glUseProgram().
