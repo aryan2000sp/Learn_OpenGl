@@ -1,6 +1,7 @@
 #include <GL/glew.h> 
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <stdlib.h>
 
 /// <summary>
 ///     This function will compile shader
@@ -40,6 +41,37 @@ static unsigned int compileShader(
 
     // TODO: Add some error checking
 
+    int result;
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+    if (result == GL_FALSE) {
+        int length;
+        glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
+
+        /*
+        * NOTE: We are using stack allocated char array
+        *       Allocating length*sizeof(char) on stack.
+        *       message is pointer pointing to some memory space
+        *       on the stack.
+        * 
+        * **NOTE: Might lead to stackover flow error is length is
+        *         message is greater than stack memory
+        */
+        //char* message = (char*)alloca(length * sizeof(char));
+
+        /*
+        * Create memory in the heap for char array aka string
+        * NOTE: Delete this array after use to avoid heap memory overflow.
+        */
+        char* message = new char[length];
+
+        glGetShaderInfoLog(shaderID, length, &length, message);
+        std::cout << "Failed to compile " 
+                  << (shaderType == GL_VERTEX_SHADER ? "Vertex shader\n" : "Fragment shader\n")
+                  << message << std::endl;
+
+        delete[] message;
+    }
+
     return shaderID;
 }
 
@@ -57,7 +89,7 @@ static unsigned int compileShader(
 /// <returns>
 ///     static int
 /// </returns>
-static int CreateShader(
+static unsigned int createShader(
     const std::string& vertexShader, 
     const std::string& fragmentShader
 ) {
@@ -82,10 +114,12 @@ static int CreateShader(
     */
     glLinkProgram(programID);
     glValidateProgram(programID);
+
+    return programID;
 }
 
 
-int main(void){
+int main(){
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -138,7 +172,26 @@ int main(void){
     //Finally enable the buffer layout
     glEnableVertexAttribArray(0);
 
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    std::string vertexShader =
+        "#version 330 core\n"
+        "\n"
+        "layout(location = 0) in vec4 position;\n"
+        "void main()\n"
+        "{\n"
+        "   gl_Position=position;\n"
+        "}\n";
+
+    std::string fragmentShader =
+        "#version 330 core\n"
+        "\n"
+        "layout(location = 0) out vec4 color;\n"
+        "void main()\n"
+        "{\n"
+        "   color=vec4(1.0, 0.0, 1.0, 1.0);\n"
+        "}\n";
+
+    unsigned int shader = createShader(vertexShader, fragmentShader);
+    glUseProgram(shader);
 
     /* Loop until the user closes the window */
     while(!glfwWindowShouldClose(window)){
@@ -159,6 +212,9 @@ int main(void){
     }
 
     glfwTerminate();
+
+    // Delete the program object container
+    glDeleteProgram(shader);
 
     // Clear the buffer
     return 0;
