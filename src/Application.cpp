@@ -2,7 +2,37 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stdlib.h>
+#include <fstream>
+#include <string>
 
+
+std::string readShaders(std::string& fileType) {
+    // Create a ifstream object on the stack
+    /*std::cout << "Shaders/" + fileName +".glsl" << "\n";*/
+    //std::cout << "Current Working Directory: " << std::filesystem::current_path() << std::endl;
+    std::string fileName = "Shaders/"+fileType+".glsl";
+    std::ifstream readFileObject(fileName);
+    
+
+    // Error checking
+    if (!readFileObject.is_open()) {
+        return "Error checking file";
+    }
+
+    std::string text;
+    std::string textLine;
+
+    while (std::getline(readFileObject, textLine)) {
+        //std::cout << textLine << "\n";
+        text += textLine+"\n";
+    }
+
+    std::cout << textLine + "\n";
+
+    readFileObject.close();
+
+    return text+"\n";
+}
 /// <summary>
 ///     This function will compile shader
 /// </summary>
@@ -172,25 +202,13 @@ int main(){
     //Finally enable the buffer layout
     glEnableVertexAttribArray(0);
 
-    std::string vertexShader =
-        "#version 330 core\n"
-        "\n"
-        "layout(location = 0) in vec4 position;\n"
-        "void main()\n"
-        "{\n"
-        "   gl_Position=position;\n"
-        "}\n";
+    std::string vertexShaderFile = "vertexShader";
+    std::string fragmentShaderFile = "fragmentShader";
+    std::string vertexShaderString = readShaders(vertexShaderFile);
+    std::string fragmentShaderString = readShaders(fragmentShaderFile);
+    
 
-    std::string fragmentShader =
-        "#version 330 core\n"
-        "\n"
-        "layout(location = 0) out vec4 color;\n"
-        "void main()\n"
-        "{\n"
-        "   color=vec4(1.0, 0.0, 1.0, 1.0);\n"
-        "}\n";
-
-    unsigned int shader = createShader(vertexShader, fragmentShader);
+    unsigned int shader = createShader(vertexShaderString, fragmentShaderString);
     glUseProgram(shader);
 
     /* Loop until the user closes the window */
